@@ -68,7 +68,7 @@ public class MusicData {
 		}
 		
 		int idx1 = postStr.indexOf(" ", idx0);
-		int idx2 = postStr.indexOf("ï¿½ï¿½ï¿½", idx0);
+		int idx2 = postStr.indexOf("£¨", idx0);
 		if (idx1 == -1 && idx2 == -1) {
 			url = postStr.substring(idx0, postStr.length());
 		} else if (idx1 == -1) {

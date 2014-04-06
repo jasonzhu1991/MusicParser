@@ -207,7 +207,7 @@ public class MusicParser {
 				errorList.add(error);
 			}
 		}
-		String fileName = new SimpleDateFormat("'out/error-'yyyy-MM-dd hh:mm'.txt'")
+		String fileName = new SimpleDateFormat("'out/error-'yyyy-MM-dd-hh-mm'.txt'")
 				.format(new Date());
 		writer.overwrite(errorList, fileName);
 		return;
@@ -222,7 +222,7 @@ public class MusicParser {
 			}
 		}
 		String fileName = new SimpleDateFormat(
-				"'out/result-'yyyy-MM-dd hh:mm'.txt'").format(new Date());
+				"'out/result-'yyyy-MM-dd-hh-mm'.txt'").format(new Date());
 		writer.overwrite(results.toString(), fileName);
 		return;
 	}
@@ -283,7 +283,7 @@ public class MusicParser {
 		
 		TxtWriter writer = new TxtWriter();
 		String fileName = new SimpleDateFormat(
-				"'out/statistics-'yyyy-MM-dd hh:mm'.txt'").format(new Date());
+				"'out/statistics-'yyyy-MM-dd-hh-mm'.txt'").format(new Date());
 		writer.overwrite(statistics, fileName);
 	}
 }
