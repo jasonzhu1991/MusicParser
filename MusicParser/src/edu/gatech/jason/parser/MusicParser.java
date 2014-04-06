@@ -79,7 +79,7 @@ public class MusicParser {
 	private void randPerm(int num) {
 		java.util.Collections.shuffle(list);
 		num = Math.min(num, getSize());
-		ArrayList<MusicData> temp = new ArrayList<>(num);
+		ArrayList<MusicData> temp = new ArrayList<MusicData>(num);
 		for (int i = 0; i < num; i++) {
 			temp.add(i, list.get(i));
 		}
@@ -89,7 +89,7 @@ public class MusicParser {
 	}
 	
 	private void subsequence(int start, int end) {
-		ArrayList<MusicData> temp = new ArrayList<>(end - start);
+		ArrayList<MusicData> temp = new ArrayList<MusicData>(end - start);
 		for (int i = start; i < end; i++) {
 			temp.add(list.get(i));
 		}
