@@ -15,7 +15,7 @@ public class MusicData {
 	private String song = "";
 	private String location;
 	private String gender;
-	private String errorMessage;
+	private String errorMessage = "";
 	private boolean success;
 	
 	public MusicData(String jsonStr) {
@@ -68,7 +68,7 @@ public class MusicData {
 		}
 		
 		int idx1 = postStr.indexOf(" ", idx0);
-		int idx2 = postStr.indexOf("（", idx0);
+		int idx2 = postStr.indexOf("���", idx0);
 		if (idx1 == -1 && idx2 == -1) {
 			url = postStr.substring(idx0, postStr.length());
 		} else if (idx1 == -1) {
@@ -88,7 +88,7 @@ public class MusicData {
 		
 		Document doc = null;
 		if (url == null) {
-			errorMessage = "URL not extracted";
+			errorMessage = "URL not found";
 			success = false;
 			return;
 		}
@@ -136,7 +136,7 @@ public class MusicData {
 			errorMessage = "Extract album data failed";
 			success = false;
 		} catch (NullPointerException e) {
-			errorMessage = "Extract song data failed";
+			errorMessage = "Extract album data failed";
 			success = false;
 		}
 		return;

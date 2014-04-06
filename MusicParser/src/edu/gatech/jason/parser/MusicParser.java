@@ -1,6 +1,8 @@
 package edu.gatech.jason.parser;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,11 +15,13 @@ import edu.gatech.jason.io.TxtWriter;
 
 public class MusicParser {
 
+	private static long startTime;
+	private static long endTime;
 	List<MusicData> list = new ArrayList<MusicData>();
 	HashMap<String, User> users = new HashMap<String, User>();
 
 	public static void main(String[] args) throws JSONException {
-		long startTime = System.currentTimeMillis();
+		startTime = System.currentTimeMillis();
 		MusicParser parser = new MusicParser();
 		try {
 			parser.readFile();
@@ -25,39 +29,18 @@ public class MusicParser {
 			e.printStackTrace();
 			return;
 		}
-		
-		boolean test = (args.length == 0);
-		if (test) {
-			parser.randPerm(100);
-		} else {
-			int start = Integer.parseInt(args[0]);
-			int end = Integer.parseInt(args[1]);
-			parser.extractSublist(start, end);
-		}
-		
+
+		parser.randPerm(100);
+
 		parser.retrieveLocationGender();
 		parser.findURL();
-		System.out.println("Successfully Found URL: " + parser.successURL()
-				+ " / " + parser.getSize());
 		parser.retrieveMusicData();
-		System.out.println("Successfully Retrieved Songs: "
-				+ parser.successSong() + " / " + parser.successURL());
-		System.out.println("Successfully Retrieved Albums: "
-				+ parser.successAlbum() + " / " + parser.successURL());
-		System.out.println("Successfully Retrieved Artists: "
-				+ parser.successArtist() + " / " + parser.successURL());
-		
-		long endTime = System.currentTimeMillis();
-		double timeElapsed = ((double) (endTime - startTime))/1000;
+
+		endTime = System.currentTimeMillis();
 		parser.outputResults();
 		parser.outputError();
-		System.out.println("Time elapsed: " + timeElapsed + " seconds");
+		parser.outputStatistics();
 		return;
-	}
-
-	private void extractSublist(int start, int end) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public int getSize() {
@@ -94,7 +77,7 @@ public class MusicParser {
 		list.addAll(temp);
 		return;
 	}
-	
+
 	private void retrieveLocationGender() {
 		for (int i = 0; i < list.size(); i++) {
 			list.get(i).retrieveLocationGender(users.get(list.get(i).getUid()));
@@ -116,8 +99,30 @@ public class MusicParser {
 
 	private void retrieveMusicData() {
 		for (int i = 0; i < list.size(); i++) {
+			if (i == 0) {
+				System.out.println("Start retrieving data...");
+				System.out.println("0% -- " + elapsedTime());
+			}
 			list.get(i).retrieveMusicData();
+			progressReport(i);
 		}
+	}
+
+	private void progressReport(int i) {
+		
+		
+		int progress = (int) Math.floor((double) i) * 100 / list.size();
+		int post_progress = (int) Math.floor((double) (i+1)) * 100 / list.size();
+		if (post_progress > progress) {
+			System.out.println(post_progress + "% -- " + elapsedTime());
+		}
+		return;
+	}
+
+	private String elapsedTime() {
+		long timeElapsed = System.currentTimeMillis() - startTime;
+		Date timeInterval = new Date(timeElapsed);
+		return new SimpleDateFormat("hh:mm:ss.SSS").format(timeInterval);
 	}
 
 	private int successURL() {
@@ -149,7 +154,7 @@ public class MusicParser {
 		}
 		return success;
 	}
-	
+
 	private int successArtist() {
 		int success = 0;
 		for (int i = 0; i < list.size(); i++) {
@@ -170,18 +175,83 @@ public class MusicParser {
 				errorList.add(error);
 			}
 		}
-		writer.overwrite(errorList, "out/error.txt");
+		String fileName = new SimpleDateFormat("'out/error-'yyyy-MM-dd hh:mm'.txt'")
+				.format(new Date());
+		writer.overwrite(errorList, fileName);
 		return;
 	}
-	
+
 	private void outputResults() throws JSONException {
 		TxtWriter writer = new TxtWriter();
 		JSONArray results = new JSONArray();
 		for (int i = 0; i < getSize(); i++) {
-			results.put(list.get(i).toJSON());
-			
+			if (list.get(i).isSuccess()) {
+				results.put(list.get(i).toJSON());
+			}
 		}
-		writer.overwrite(results.toString(), "out/result.txt");
+		String fileName = new SimpleDateFormat(
+				"'out/result-'yyyy-MM-dd hh:mm'.txt'").format(new Date());
+		writer.overwrite(results.toString(), fileName);
 		return;
+	}
+
+	public void outputStatistics() {
+		ArrayList<String> statistics = new ArrayList<String>();
+		int successful = 0;
+		int errorJsonNotReadable = 0;
+		int errorJsonFormatWrong = 0;
+		int errorUrlNotFound = 0;
+		int errorHtmlNotRetrieved = 0;
+		int errorUrlNotParseable = 0;
+		int errorArtistsNotParseable = 0;
+		int errorExtractAlbum = 0;
+		int errorExtractSong = 0;
+		int errorOthers = 0;
+		
+		for (MusicData data : list) {
+			if (data.getErrorMessage() == "") {
+				successful++;
+			} else if (data.getErrorMessage().equals("Json file not readable")) {
+				errorJsonNotReadable++;
+			} else if (data.getErrorMessage().equals("Json format wrong")) {
+				errorJsonFormatWrong++;
+			} else if (data.getErrorMessage().equals("URL not found")) {
+				errorUrlNotFound++;
+			} else if (data.getErrorMessage().equals("HTML not retrieved")) {
+				errorHtmlNotRetrieved++;
+			} else if (data.getErrorMessage().equals("URL not parseable")) {
+				errorUrlNotParseable++;
+			} else if (data.getErrorMessage().equals("Extracting artists not implemented")) {
+				errorArtistsNotParseable++;
+			} else if (data.getErrorMessage().equals("Extract album data failed")) {
+				errorExtractAlbum++;
+			} else if (data.getErrorMessage().equals("Extract song data failed")) {
+				errorExtractSong++;
+			} else {
+				errorOthers++;
+			}
+		}
+		
+		statistics.add("Time elapsed: " + (double) (endTime - startTime) / 1000);
+		statistics.add("Successfully Retrieved: " + successful);
+		statistics.add("Json file not readable: " + errorJsonNotReadable);
+		statistics.add("Json format wrong: " + errorJsonFormatWrong);
+		statistics.add("URL not found: " + errorUrlNotFound);
+		statistics.add("HTML not retrieved: " + errorHtmlNotRetrieved);
+		statistics.add("URL not parseable: " + errorUrlNotParseable);
+		statistics.add("Extracting artists not implemented: " + errorArtistsNotParseable);
+		statistics.add("Extract album data failed: " + errorExtractAlbum);
+		statistics.add("Extract song data failed: " + errorExtractSong);
+		statistics.add("Other errors: " + errorOthers);
+		statistics.add("---------------------------------");
+		statistics.add("Retrieved URLs: " + successURL());
+		statistics.add("Retrieved artists: " + successArtist());
+		statistics.add("Retrieved albums: " + successAlbum());
+		statistics.add("Retrieved songs: " + successSong());
+		
+		TxtWriter writer = new TxtWriter();
+		String fileName = new SimpleDateFormat(
+				"'out/statistics-'yyyy-MM-dd hh:mm'.txt'").format(new Date());
+		writer.overwrite(statistics, fileName);
 	}
 }
