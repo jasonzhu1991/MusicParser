@@ -91,7 +91,7 @@ public class MusicParser {
 	private void subsequence(int start, int end) {
 		ArrayList<MusicData> temp = new ArrayList<>(end - start);
 		for (int i = start; i < end; i++) {
-			temp.add(i, list.get(i));
+			temp.add(list.get(i));
 		}
 		list.clear();
 		list.addAll(temp);
