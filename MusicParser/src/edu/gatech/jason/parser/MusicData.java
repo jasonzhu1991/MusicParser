@@ -102,6 +102,11 @@ public class MusicData {
 		String baseUrl = doc.baseUri();
 		baseUrl = baseUrl.replace("http://www.xiami.com/", "");
 		int idx = baseUrl.indexOf("/");
+		if (idx == -1) {
+			errorMessage = "URL not parseable";
+			success = false;
+			return;
+		}
 		String category = baseUrl.substring(0, idx);
 		if (category.equals("song")) {
 			extraxtSong(doc);
