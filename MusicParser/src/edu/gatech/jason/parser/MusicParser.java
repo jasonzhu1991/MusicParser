@@ -21,6 +21,7 @@ public class MusicParser {
 	HashMap<String, User> users = new HashMap<String, User>();
 
 	public static void main(String[] args) throws JSONException {
+		boolean test = (args.length == 0);
 		startTime = System.currentTimeMillis();
 		MusicParser parser = new MusicParser();
 		try {
@@ -30,7 +31,16 @@ public class MusicParser {
 			return;
 		}
 
-		parser.randPerm(100);
+		if (test) {
+			parser.randPerm(100);
+		} else {
+			int start = Integer.parseInt(args[0]) * 1000;
+			int end = Integer.parseInt(args[1]) * 1000;
+			if (end == 27000) {
+				end = parser.getSize();
+			}
+			parser.subsequence(start, end);	
+		}
 
 		parser.retrieveLocationGender();
 		parser.findURL();
@@ -53,7 +63,7 @@ public class MusicParser {
 		for (int i = 0; i < data.size(); i++) {
 			list.add(new MusicData(data.get(i)));
 		}
-		String usersRaw = reader.readAsArrayList("res/cse6242-users-short.txt")
+		String usersRaw = reader.readAsArrayList("res/cse6242-users.txt")
 				.get(0);
 		JSONArray usersJson = new JSONArray(usersRaw);
 		for (int i = 0; i < usersJson.length(); i++) {
@@ -71,6 +81,16 @@ public class MusicParser {
 		num = Math.min(num, getSize());
 		ArrayList<MusicData> temp = new ArrayList<>(num);
 		for (int i = 0; i < num; i++) {
+			temp.add(i, list.get(i));
+		}
+		list.clear();
+		list.addAll(temp);
+		return;
+	}
+	
+	private void subsequence(int start, int end) {
+		ArrayList<MusicData> temp = new ArrayList<>(end - start);
+		for (int i = start; i < end; i++) {
 			temp.add(i, list.get(i));
 		}
 		list.clear();
@@ -109,8 +129,6 @@ public class MusicParser {
 	}
 
 	private void progressReport(int i) {
-		
-		
 		int progress = (int) Math.floor((double) i) * 100 / list.size();
 		int post_progress = (int) Math.floor((double) (i+1)) * 100 / list.size();
 		if (post_progress > progress) {
@@ -121,8 +139,22 @@ public class MusicParser {
 
 	private String elapsedTime() {
 		long timeElapsed = System.currentTimeMillis() - startTime;
-		Date timeInterval = new Date(timeElapsed);
-		return new SimpleDateFormat("hh:mm:ss.SSS").format(timeInterval);
+		long totalSeconds = timeElapsed / 1000;
+		String seconds = String.valueOf(totalSeconds % 60);
+		if (seconds.length() < 2) {
+			seconds = "0" + seconds;
+		}
+		long totalMinutes = totalSeconds / 60;
+		String minutes = String.valueOf(totalMinutes % 60);
+		if (minutes.length() < 2) {
+			minutes = "0" + minutes;
+		}
+		long totalHours = totalMinutes / 60;
+		String hours = String.valueOf(totalHours);
+		if (hours.length() < 2) {
+			hours = "0" + hours;
+		}
+		return hours + ":" + minutes + ":" + seconds;
 	}
 
 	private int successURL() {
