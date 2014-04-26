@@ -32,7 +32,7 @@ public class MusicParser {
 		}
 
 		if (test) {
-			parser.randPerm(100);
+			//parser.randPerm(100);
 		} else {
 			int start = Integer.parseInt(args[0]) * 1000;
 			int end = Integer.parseInt(args[1]) * 1000;
